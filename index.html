@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#05070f">
+<title>Физика • 11 класс • Переменный ток</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Rubik:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05070f; --panel:rgba(11,18,36,.86); --line:#1a2a4d; --line2:#22385f;
+  --cy:#00e5ff; --cy2:#6ff7ff; --mg:#ff3df0; --am:#ffc247; --rd:#ff4d6d; --gr:#57ffb0;
+  --tx:#e9f2ff; --mut:#8ea3c9;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:'Rubik',system-ui,sans-serif;background:var(--bg);color:var(--tx);
+  min-height:100dvh;overflow-x:hidden;touch-action:manipulation;
+}
+/* фон: сетка-«миллиметровка» + неоновые пятна */
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(0,229,255,.045) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(0,229,255,.045) 1px,transparent 1px);
+  background-size:34px 34px;}
+.blob{position:fixed;border-radius:50%;filter:blur(95px);opacity:.32;z-index:0;pointer-events:none;
+  animation:drift 20s ease-in-out infinite alternate}
+.b1{width:62vmin;height:62vmin;background:var(--cy);top:-22vmin;left:-16vmin}
+.b2{width:56vmin;height:56vmin;background:var(--mg);bottom:-24vmin;right:-14vmin;animation-delay:-10s}
+@keyframes drift{to{transform:translate(7vmin,5vmin) scale(1.18)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.wrap{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:18px 16px 60px}
+.brand{font-family:'Russo One';letter-spacing:2px;font-size:12px;color:var(--cy2);
+  text-shadow:0 0 10px rgba(0,229,255,.7);text-align:center;margin-bottom:14px}
+.screen{display:none}
+.screen.active{display:block;animation:up .45s ease}
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  padding:22px 18px;backdrop-filter:blur(6px);box-shadow:0 10px 40px rgba(0,0,0,.45)}
+.kicker{font-family:'Russo One';font-size:11px;letter-spacing:2px;color:var(--mg);
+  text-shadow:0 0 10px rgba(255,61,240,.6)}
+h1{font-family:'Russo One';font-size:clamp(21px,5.4vw,30px);line-height:1.25;margin:10px 0 4px;
+  color:#fff;text-shadow:0 0 18px rgba(0,229,255,.35)}
+.sub{color:var(--mut);font-size:14px;margin-bottom:16px}
+.teach{display:flex;gap:12px;align-items:center;border:1px solid var(--line2);border-radius:12px;
+  padding:12px 14px;margin:14px 0;background:rgba(0,229,255,.05)}
+.teach .ic{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;
+  background:#0d1c38;border:1px solid var(--line2);font-size:20px;box-shadow:0 0 12px rgba(0,229,255,.25)}
+.teach small{display:block;color:var(--mut);font-size:11px;letter-spacing:1px;text-transform:uppercase}
+.teach b{font-size:15px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12.5px;color:var(--mut);margin-bottom:6px;letter-spacing:.4px}
+input[type=text],select{
+  width:100%;font:16px 'Rubik';color:var(--tx);background:#0a1226;border:1px solid var(--line2);
+  border-radius:11px;padding:13px 12px;outline:none;transition:.2s;appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--cy2) 50%),linear-gradient(135deg,var(--cy2) 50%,transparent 50%);
+  background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%;background-size:6px 6px;background-repeat:no-repeat}
+select{cursor:pointer}
+input[type=text]{background-image:none}
+input:focus,select:focus{border-color:var(--cy);box-shadow:0 0 12px rgba(0,229,255,.4)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-family:'Russo One';font-size:11px;
+  letter-spacing:.6px;padding:7px 11px;border:1px solid var(--line2);border-radius:999px;color:var(--cy2);
+  background:rgba(0,229,255,.06)}
+.att-row{margin:14px 0 4px}
+
+.btn{display:block;width:100%;font-family:'Russo One';font-size:15px;letter-spacing:1px;
+  padding:15px;border-radius:13px;border:1px solid var(--line2);background:#0c1630;color:var(--mut);
+  cursor:pointer;transition:.25s}
+.btn.lit{color:#001318;border-color:transparent;
+  background:linear-gradient(135deg,var(--cy),#45f2ff 60%,var(--cy2));
+  box-shadow:0 0 18px rgba(0,229,255,.8),0 0 50px rgba(0,229,255,.35);
+  animation:pulse 1.7s ease-in-out infinite}
+.btn.mg-lit{color:#1c001a;background:linear-gradient(135deg,var(--mg),#ff7ae0);
+  box-shadow:0 0 18px rgba(255,61,240,.8),0 0 50px rgba(255,61,240,.3)}
+.btn:not(.lit):not(.mg-lit){opacity:.55;cursor:not-allowed}
+@keyframes pulse{50%{box-shadow:0 0 28px rgba(0,229,255,1),0 0 80px rgba(0,229,255,.5)}}
+
+.disc li{display:flex;gap:10px;list-style:none;margin:11px 0;font-size:14px;line-height:1.45}
+.disc li i{flex:none;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;
+  font-style:normal;background:#0d1c38;border:1px solid var(--line2);box-shadow:0 0 8px rgba(0,229,255,.2)}
+.honest{margin-top:16px;border:1px dashed var(--mg);border-radius:12px;padding:12px 14px;
+  color:#ffb8f4;font-size:13px;background:rgba(255,61,240,.05)}
+
+/* тест */
+.qhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.qhead .sp{flex:1}
+.ring{width:66px;height:66px;position:relative;flex:none}
+.ring svg{transform:rotate(-90deg);width:100%;height:100%}
+.ring circle{fill:none;stroke-width:5}
+.ring .rb{stroke:#15233d}
+.ring .rf{stroke:var(--cy);stroke-linecap:round;stroke-dasharray:163.4;stroke-dashoffset:0;
+  filter:drop-shadow(0 0 4px var(--cy));transition:stroke .3s}
+.ring.warn .rf{stroke:var(--am);filter:drop-shadow(0 0 4px var(--am))}
+.ring.danger .rf{stroke:var(--rd);filter:drop-shadow(0 0 5px var(--rd))}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-family:'Russo One';font-size:13px}
+.dots{display:flex;gap:6px;margin:10px 2px 14px}
+.dots i{flex:1;height:5px;border-radius:3px;background:#13223f;transition:.3s}
+.dots i.cur{background:var(--cy);box-shadow:0 0 10px var(--cy)}
+.dots i.done{background:#274a78}
+.qtopic{font-family:'Russo One';font-size:11px;letter-spacing:1.6px;color:var(--mg);
+  text-shadow:0 0 10px rgba(255,61,240,.55);margin-bottom:8px}
+.qtext{font-size:16.5px;line-height:1.5;font-weight:500;margin-bottom:16px}
+.opts{display:grid;gap:10px}
+.opts.grid2{grid-template-columns:1fr 1fr}
+@media (max-width:560px){.opts.grid2{grid-template-columns:1fr}}
+.opt{display:flex;gap:11px;align-items:center;text-align:left;width:100%;font:15px 'Rubik';
+  color:var(--tx);background:rgba(12,20,40,.75);border:1px solid var(--line);border-radius:12px;
+  padding:12px;cursor:pointer;transition:.2s}
+.opt:hover{border-color:#2e5390;transform:translateY(-2px)}
+.opt:active{transform:scale(.985)}
+.opt .lt{font-family:'Russo One';width:32px;height:32px;flex:none;display:grid;place-items:center;
+  border:1px solid var(--line2);border-radius:9px;color:var(--cy2);transition:.2s}
+.opt.sel{border-color:var(--cy);background:rgba(0,229,255,.08);
+  box-shadow:0 0 14px rgba(0,229,255,.55),inset 0 0 16px rgba(0,229,255,.1)}
+.opt.sel .lt{background:var(--cy);color:#001318;box-shadow:0 0 12px var(--cy)}
+.opt.plot{flex-direction:column;align-items:stretch}
+.opt.plot .lt{position:absolute;transform:none;margin:0}
+.opt.plot{position:relative;padding-top:44px}
+.opt.plot .lt{position:absolute;top:10px;left:10px}
+.pv svg{width:100%;height:auto;display:block;background:#060c19;border:1px solid #14233f;border-radius:10px}
+.gm{stroke:#1a2947;stroke-width:1}
+.ax{stroke:#9ecbff;stroke-width:1.4}
+.axf{fill:#9ecbff}
+.cv{fill:none;stroke-width:2.6;stroke-linecap:round;filter:drop-shadow(0 0 4px rgba(92,242,255,.8))}
+.num{fill:#8ea3c9;font:9.5px 'JetBrains Mono',monospace}
+.num.sp{fill:var(--am);font-style:italic}
+.lbl{fill:#bfe9ff;font:italic 11.5px 'Rubik'}
+.wr{stroke:#7fb7ff;stroke-width:2}
+.el{stroke:#5cf2ff;stroke-width:2;fill:none}
+.ell{fill:#a9dcff;font:11px 'JetBrains Mono',monospace;text-anchor:middle}
+.src{fill:#081120;stroke:#7fb7ff;stroke-width:2}
+.sym{fill:#cfe9ff;font-size:14px;text-anchor:middle}
+
+.note{font-size:12.5px;color:var(--mut);margin:-6px 0 12px}
+.calc .field:last-of-type{margin-bottom:6px}
+#btnNext{margin-top:16px}
+
+/* результат */
+.score-big{font-family:'Russo One';font-size:56px;text-align:center;color:#fff;
+  text-shadow:0 0 24px rgba(0,229,255,.8);margin:6px 0 2px}
+.score-big small{font-size:22px;color:var(--cy2)}
+.verdict{text-align:center;color:var(--cy2);font-family:'Russo One';font-size:13px;letter-spacing:2px;margin-bottom:14px}
+.bar{height:10px;border-radius:6px;background:#101f3a;overflow:hidden;margin:8px 0 18px;border:1px solid var(--line)}
+.bar i{display:block;height:100%;width:0;border-radius:6px;transition:width 1.2s ease;
+  background:linear-gradient(90deg,var(--cy),var(--mg));box-shadow:0 0 12px rgba(0,229,255,.8)}
+.res-row{display:flex;justify-content:space-between;gap:10px;padding:9px 2px;border-bottom:1px dashed var(--line);font-size:14.5px}
+.res-row span{color:var(--mut)} .res-row b{text-align:right}
+.sheet-line{font-size:12.5px;color:var(--mut);margin:14px 2px}
+.btn+.btn{margin-top:10px}
+.btn.ghost{opacity:1;background:transparent;border:1px solid var(--line2);color:var(--cy2)}
+
+/* предупреждение античита */
+#acOv{position:fixed;inset:0;z-index:50;background:rgba(4,6,14,.92);display:none;place-items:center;padding:20px}
+#acOv.show{display:grid}
+.ac-card{max-width:420px;width:100%;border:1px solid var(--am);border-radius:16px;padding:26px 20px;text-align:center;
+  background:#120f05;box-shadow:0 0 30px rgba(255,194,71,.4);animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.ac-card .big{font-size:44px}
+.ac-card h3{font-family:'Russo One';color:var(--am);margin:8px 0;letter-spacing:1px}
+.ac-card p{font-size:14px;color:#ffe6b3;line-height:1.5;margin-bottom:16px}
+.ac-card .btn{background:var(--am);color:#241800;opacity:1;box-shadow:0 0 16px rgba(255,194,71,.6);border:none}
+footer{position:relative;z-index:1;text-align:center;color:#3f5680;font-size:11.5px;padding:0 16px 26px}
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div>
+
+<div class="wrap">
+  <div class="brand">⚛ ФИЗИКА • ПЕРЕМЕННЫЙ ТОК • 11 КЛАСС</div>
+
+  <!-- ЭКРАН 1: регистрация -->
+  <section id="scr-start" class="screen active">
+    <div class="card">
+      <div class="kicker">КОНТРОЛЬНЫЙ ТЕСТ • 2 ВАРИАНТА</div>
+      <h1>Электромагнитные колебания: генератор, цепь переменного тока, трансформатор</h1>
+      <div class="sub">10 вопросов • 90 секунд на вопрос • максимальный балл — 10</div>
+      <div class="teach">
+        <div class="ic">👨‍🏫</div>
+        <div><small>Учитель физики</small><b>Кунгозин Даулет Багдашұлы</b></div>
+      </div>
+      <div class="field"><label for="fio">Фамилия и имя учащегося</label>
+        <input type="text" id="fio" placeholder="Введите ФИ" autocomplete="name" autocapitalize="words"></div>
+      <div class="row2">
+        <div class="field"><label for="klass">Класс</label>
+          <select id="klass"><option value="">— выберите —</option><option>11 Б</option><option>11 В</option></select></div>
+        <div class="field"><label for="variant">Вариант</label>
+          <select id="variant"><option value="">— выберите —</option><option value="v1">Вариант 1</option><option value="v2">Вариант 2</option></select></div>
+      </div>
+      <div class="att-row"><span class="chip" id="attChip">Попыток использовано: 0</span></div>
+      <button class="btn" id="btnNext1" disabled>ПРОДОЛЖИТЬ →</button>
+    </div>
+  </section>
+
+  <!-- ЭКРАН 2: дисклеймер -->
+  <section id="scr-disc" class="screen">
+    <div class="card disc">
+      <div class="kicker">ДИСКЛЕЙМЕР — ПРОЧТИТЕ ПЕРЕД СТАРТОМ</div>
+      <h1>Правила прохождения теста</h1>
+      <ul>
+        <li><i>⏱</i>На каждый вопрос даётся <b>&nbsp;1 минута 30 секунд</b>. Когда время истекает — тест автоматически переходит к следующему вопросу.</li>
+        <li><i>⛔</i>Кнопки «Назад» нет. Исправить выбранный ответ после перехода нельзя.</li>
+        <li><i>🧮</i>В расчётных задачах выберите формулу из списка и введите ответ <b>&nbsp;числом без единиц измерения</b> (π ≈ 3,14). Балл ставится только при верной формуле И верном ответе.</li>
+        <li><i>🕵</i>Работает система античитинга: при сворачивании вкладки, переключении приложений или попытке открыть второе окно поверх теста — <b>&nbsp;первый раз предупреждение, второй раз тест завершается автоматически</b>. Любое завершение теста засчитывается как попытка.</li>
+        <li><i>📊</i>Результат (балл, ФИ, класс, вариант, число попыток) автоматически отправляется учителю в Google Sheets.</li>
+        <li><i>🔁</i>Число попыток сохраняется для каждого учащегося.</li>
+      </ul>
+      <div class="honest">🎓 <b>Академическая честность:</b> тест выполняется самостоятельно, без подсказок, телефонов и посторонней помощи.</div>
+      <br>
+      <button class="btn mg-lit" id="btnStart">▶ НАЧАТЬ ТЕСТ</button>
+    </div>
+  </section>
+
+  <!-- ЭКРАН 3: тест -->
+  <section id="scr-quiz" class="screen">
+    <div class="qhead">
+      <span class="chip" id="chipFio">—</span>
+      <span class="chip" id="chipVar">—</span>
+      <span class="chip" id="chipQ">1 / 10</span>
+      <span class="sp"></span>
+      <div class="ring" id="ring">
+        <svg viewBox="0 0 60 60"><circle class="rb" cx="30" cy="30" r="26"/><circle class="rf" id="ringFg" cx="30" cy="30" r="26"/></svg>
+        <b id="tSec">1:30</b>
+      </div>
+    </div>
+    <div class="dots" id="dots"></div>
+    <div class="card">
+      <div class="qtopic" id="qTopic"></div>
+      <div class="qtext" id="qText"></div>
+      <div class="opts" id="optsBox"></div>
+      <div class="calc" id="calcBox" style="display:none">
+        <div class="field"><label for="fSel">1) Выберите формулу для решения</label>
+          <select id="fSel"><option value="">— выберите формулу —</option></select></div>
+        <div class="field"><label for="aIn">2) Ответ (только число, без единиц)</label>
+          <input type="text" id="aIn" inputmode="decimal" autocomplete="off" placeholder="Например: 220"></div>
+        <div class="note" id="unitNote"></div>
+      </div>
+      <button class="btn" id="btnNext" disabled>ДАЛЕЕ →</button>
+    </div>
+  </section>
+
+  <!-- ЭКРАН 4: результат -->
+  <section id="scr-res" class="screen">
+    <div class="card">
+      <div class="kicker">РЕЗУЛЬТАТ ТЕСТА</div>
+      <div class="score-big"><span id="resScore">0</span><small> / 10</small></div>
+      <div class="verdict" id="resVerdict"></div>
+      <div class="bar"><i id="resBar"></i></div>
+      <div class="res-row"><span>ФИ учащегося</span><b id="rFio"></b></div>
+      <div class="res-row"><span>Класс</span><b id="rKlass"></b></div>
+      <div class="res-row"><span>Вариант</span><b id="rVar"></b></div>
+      <div class="res-row"><span>Статус</span><b id="rStat"></b></div>
+      <div class="res-row"><span>Попыток использовано</span><b id="rAtt"></b></div>
+      <div class="sheet-line" id="sheetStat">Отправка результата учителю…</div>
+      <button class="btn ghost" id="btnSend">📨 ОТПРАВИТЬ В GOOGLE SHEETS</button>
+      <button class="btn lit" id="btnAgain">↻ ПРОЙТИ ЗАНОВО</button>
+    </div>
+  </section>
+</div>
+
+<footer>Учитель физики: Кунгозин Даулет Багдашұлы • Тест по теме «Переменный ток» • 11 класс</footer>
+
+<!-- ПРЕДУПРЕЖДЕНИЕ АНТИЧИТА -->
+<div id="acOv">
+  <div class="ac-card">
+    <div class="big">⚠️</div>
+    <h3>ПЕРВОЕ ПРЕДУПРЕЖДЕНИЕ</h3>
+    <p id="acTxt">Обнаружено переключение окон или сворачивание теста. При повторном нарушении тест будет завершён автоматически, попытка будет засчитана.</p>
+    <button class="btn" id="acBtn">ПОНЯТНО, ПРОДОЛЖИТЬ ТЕСТ</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ================== НАСТРОЙКА ================== */
+// Вставьте сюда URL веб-приложения Apps Script (см. инструкцию)
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxrcYPKR8DElonS1UYaUfaZHkfbrTRy1iGhs_I9m9R993_0nymMcVinm-zxDKpSNEAvBw/exec';
+const TIME_Q = 90;               // секунд на вопрос (1,5 мин)
+const MAX_SCORE = 10;
+
+/* ================== УТИЛИТЫ ================== */
+const $ = s => document.querySelector(s);
+const letters = ['А','Б','В','Г'];
+const fmtT = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+const LSK = 'phys11_ac_test';
+const store = {
+  get(){ try{ return JSON.parse(localStorage.getItem(LSK))||{} }catch(e){ return {} } },
+  set(v){ try{ localStorage.setItem(LSK, JSON.stringify(v)) }catch(e){} }
+};
+const attKey = p => `${(p.fio||'').trim().toLowerCase().replace(/\s+/g,' ')}|${p.klass}|${p.variant}`;
+const getAttempts = p => store.get()[attKey(p)] || 0;
+
+/* ================== SVG-ПОСТРОИТЕЛИ ================== */
+function plotSVG({yLabel, xLabel='t, с', yMin, yMax, xMax=4, fn, mY=[], mX=null, specialX=null, color='#5cf2ff', uy=18}){
+  const ux=72, pl=42, pr=20, pt=16, pb=30;
+  const pw=xMax*ux, ph=(yMax-yMin)*uy;
+  const W=pl+pw+pr, H=pt+ph+pb;
+  const X=x=>pl+x*ux, Y=y=>pt+(yMax-y)*uy;
+  let g='';
+  for(let x=pl;x<=pl+pw+.5;x+=18) g+=`<line x1="${x}" y1="${pt}" x2="${x}" y2="${pt+ph}" class="gm"/>`;
+  for(let y=pt;y<=pt+ph+.5;y+=18) g+=`<line x1="${pl}" y1="${y}" x2="${pl+pw}" y2="${y}" class="gm"/>`;
+  const y0=(yMin<0)?Y(0):Y(yMin);
+  let d='',pen=false;
+  for(let px=0;px<=pw;px+=2){
+    const x=px/ux, y=fn(x);
+    if(!isFinite(y)||y<yMin-.05||y>yMax+.05){pen=false;continue;}
+    d+=(pen?'L':'M')+(pl+px)+' '+Y(y).toFixed(1)+' '; pen=true;
+  }
+  const xm=mX||[...Array(xMax)].map((_,i)=>i+1);
+  let tk='';
+  xm.forEach(v=>{tk+=`<line x1="${X(v)}" y1="${y0-4}" x2="${X(v)}" y2="${y0+4}" class="ax"/><text x="${X(v)}" y="${y0+15}" class="num" text-anchor="middle">${v}</text>`;});
+  mY.forEach(v=>{tk+=`<line x1="${pl-4}" y1="${Y(v)}" x2="${pl+4}" y2="${Y(v)}" class="ax"/><text x="${pl-7}" y="${Y(v)+3.5}" class="num" text-anchor="end">${v}</text>`;});
+  if(specialX) tk+=`<line x1="${X(specialX.x)}" y1="${y0-4}" x2="${X(specialX.x)}" y2="${y0+4}" class="ax"/><text x="${X(specialX.x)}" y="${y0+15}" class="num sp" text-anchor="middle">${specialX.l}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}">${g}
+  <line x1="${pl}" y1="${pt-8}" x2="${pl}" y2="${pt+ph}" class="ax"/><path d="M ${pl} ${pt-10} l -4.5 8 h 9 z" class="axf"/>
+  <line x1="${pl}" y1="${y0}" x2="${pl+pw+10}" y2="${y0}" class="ax"/><path d="M ${pl+pw+12} ${y0} l -8 -4.5 v 9 z" class="axf"/>
+  <path d="${d}" class="cv" style="stroke:${color}"/>${tk}
+  <text x="${pl+pw+10}" y="${y0-8}" class="lbl" text-anchor="end">${xLabel}</text>
+  <text x="${pl+9}" y="${pt}" class="lbl">${yLabel}</text></svg>`;
+}
+/* волны: период 4 с */
+const wSin  = t=>Math.sin(Math.PI*t/2), wCos = t=>Math.cos(Math.PI*t/2);
+const wNSin = t=>-wSin(t),              wNCos= t=>-wCos(t), wOne = ()=>1;
+const wave = (fn,lbl)=>plotSVG({yLabel:lbl,yMin:-2,yMax:2,fn,mY:[-2,-1,1,2]});
+/* резонансные кривые */
+const bell  = t=>1.8*Math.exp(-((t-2)**2)/0.28);
+const bell2 = t=>1.8*Math.exp(-((t-3.2)**2)/0.28);
+const flat  = ()=>0.9, decay = t=>0.2+1.5*Math.exp(-t/0.9);
+const resPlot = fn=>plotSVG({yLabel:'I, А',xLabel:'ν, Гц',yMin:0,yMax:2,fn,mY:[1,2],mX:[1,3,4],specialX:{x:2,l:'ν₀'},uy:36});
+/* электрические схемы */
+function circuitSVG(kind){
+  const w=300,h=124,top=30,bot=100,lx=34,rx=266,cy=65;
+  const wire=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="wr"/>`;
+  const R=x=>`<polyline points="${x},30 ${x+6},30 ${x+10},20 ${x+18},40 ${x+26},20 ${x+34},40 ${x+38},30 ${x+44},30" class="el"/><text x="${x+22}" y="14" class="ell">R</text>`;
+  const L=x=>`<path d="M ${x} 30 h6 q 6 -17 12 0 q 6 -17 12 0 q 6 -17 12 0 h6" class="el"/><text x="${x+24}" y="14" class="ell">L</text>`;
+  const C=x=>`${wire(x,30,x+18,30)}<line x1="${x+18}" y1="16" x2="${x+18}" y2="44" class="el"/><line x1="${x+26}" y1="16" x2="${x+26}" y2="44" class="el"/>${wire(x+26,30,x+44,30)}<text x="${x+22}" y="14" class="ell">C</text>`;
+  let seg='';
+  if(kind==='RLC') seg=wire(lx,top,78,top)+R(78)+wire(122,top,132,top)+L(132)+wire(180,top,196,top)+C(196)+wire(240,top,rx,top);
+  if(kind==='R')   seg=wire(lx,top,110,top)+R(110)+wire(154,top,rx,top);
+  if(kind==='L')   seg=wire(lx,top,106,top)+L(106)+wire(154,top,rx,top);
+  if(kind==='RC')  seg=wire(lx,top,96,top)+R(96)+wire(140,top,158,top)+C(158)+wire(202,top,rx,top);
+  let g='';
+  for(let x=12;x<w;x+=16)g+=`<line x1="${x}" y1="0" x2="${x}" y2="${h}" class="gm"/>`;
+  for(let y=10;y<h;y+=16)g+=`<line x1="0" y1="${y}" x2="${w}" y2="${y}" class="gm"/>`;
+  return `<svg viewBox="0 0 ${w} ${h}">${g}
+    ${wire(lx,cy,lx,bot)}${wire(lx,bot,rx,bot)}${wire(rx,bot,rx,top)}
+    ${wire(lx,cy-14,lx,top)}${seg}
+    <circle cx="${lx}" cy="${cy}" r="14" class="src"/><text x="${lx}" y="${cy+5}" class="sym">∿</text></svg>`;
+}
+
+/* ================== БАНК ВОПРОСОВ ================== */
+const BANK = {
+v1:[
+ {t:'ЭДС генератора',type:'mcq',q:'Рамка равномерно вращается в однородном магнитном поле. Мгновенное значение ЭДС индукции в рамке изменяется по закону:',
+  o:['e = E<sub>m</sub> · t²','e = const','e = E<sub>m</sub> · sin ωt','e = E<sub>m</sub> · ω · t'],a:2},
+ {t:'Частота вращения ротора генератора',type:'mcq',q:'Частота переменного тока, вырабатываемого генератором с одной парой полюсов, равна:',
+  o:['удвоенной частоте вращения ротора','половине частоты вращения ротора','квадрату частоты вращения ротора','частоте вращения ротора'],a:3},
+ {t:'Действующие значения напряжения и силы тока',type:'mcq',q:'Действующее значение напряжения связано с амплитудным соотношением:',
+  o:['U = U<sub>m</sub> · √2','U = U<sub>m</sub> / √2','U = 2 · U<sub>m</sub>','U = U<sub>m</sub>²'],a:1},
+ {t:'Мгновенное значение напряжения',type:'mcq',plot:true,q:'Мгновенное значение напряжения в цепи изменяется по закону u = sin ωt (В). Выберите соответствующий график:',
+  o:[{svg:wave(wCos,'u, В')},{svg:wave(wSin,'u, В')},{svg:wave(wNSin,'u, В')},{svg:wave(wOne,'u, В')}],a:1},
+ {t:'Мгновенное значение силы тока',type:'mcq',plot:true,q:'Сила тока в цепи изменяется по закону i = cos ωt (А). Укажите график зависимости силы тока от времени:',
+  o:[{svg:wave(wNSin,'i, А')},{svg:wave(wNCos,'i, А')},{svg:wave(wCos,'i, А')},{svg:wave(wOne,'i, А')}],a:2},
+ {t:'Условие резонанса',type:'mcq',plot:true,q:'Резонанс в цепи переменного тока возможен при последовательном соединении элементов. На какой схеме изображена такая цепь?',
+  o:[{svg:circuitSVG('R')},{svg:circuitSVG('RLC')},{svg:circuitSVG('L')},{svg:circuitSVG('RC')}],a:1},
+ {t:'Индуктивное сопротивление',type:'calc',q:'Катушка индуктивностью L = 0,2 Гн подключена к сети частотой ν = 50 Гц. Найдите индуктивное сопротивление катушки.',
+  f:['X<sub>L</sub> = 2πνL','X<sub>L</sub> = 1 / (2πνL)','X<sub>L</sub> = 2πL / ν','X<sub>L</sub> = ν / (2πL)'],fa:0,ans:62.8,tol:0.5,note:'Ответ введите числом в омах (Ом). π ≈ 3,14.'},
+ {t:'Ёмкостное сопротивление',type:'calc',q:'Конденсатор ёмкостью C = 100 мкФ подключён к сети частотой ν = 50 Гц. Найдите ёмкостное сопротивление конденсатора.',
+  f:['X<sub>C</sub> = 2πνC','X<sub>C</sub> = C / (2πν)','X<sub>C</sub> = 1 / (2πνC)','X<sub>C</sub> = 2πν / C'],fa:2,ans:31.8,tol:0.6,note:'Ответ введите числом в омах (Ом). π ≈ 3,14; 100 мкФ = 10⁻⁴ Ф.'},
+ {t:'Максимальная сила тока при резонансе',type:'calc',q:'В цепи из последовательно соединённых R, L и C наступил резонанс. Амплитуда напряжения U<sub>m</sub> = 120 В, активное сопротивление R = 30 Ом. Найдите максимальную силу тока в режиме резонанса.',
+  f:['I<sub>m</sub> = U<sub>m</sub> · R','I<sub>m</sub> = U<sub>m</sub> / R','I<sub>m</sub> = R / U<sub>m</sub>','I<sub>m</sub> = U<sub>m</sub> · R²'],fa:1,ans:4,tol:0.05,note:'Ответ введите числом в амперах (А).'},
+ {t:'Коэффициент трансформации',type:'calc',q:'Первичная обмотка трансформатора содержит N₁ = 500 витков, вторичная — N₂ = 25 витков. Найдите коэффициент трансформации.',
+  f:['k = N₂ / N₁','k = N₁ · N₂','k = N₁ + N₂','k = N₁ / N₂'],fa:3,ans:20,tol:0.05,note:'Ответ — безразмерное число.'}
+],
+v2:[
+ {t:'ЭДС генератора',type:'mcq',q:'Амплитуда ЭДС рамки с N витками и площадью S, равномерно вращающейся с угловой скоростью ω в магнитном поле индукцией B, равна:',
+  o:['E<sub>m</sub> = B · S / ω','E<sub>m</sub> = B · S · ω · N','E<sub>m</sub> = ω / (B · S)','E<sub>m</sub> = B · S · ω²'],a:1},
+ {t:'Действующие значения напряжения и силы тока',type:'mcq',q:'Действующее значение силы переменного тока связано с амплитудным соотношением:',
+  o:['I = I<sub>m</sub> · √2','I = 2 · I<sub>m</sub>','I = I<sub>m</sub> / √2','I = I<sub>m</sub>²'],a:2},
+ {t:'Ёмкостное сопротивление',type:'mcq',q:'Ёмкостное сопротивление конденсатора вычисляется по формуле:',
+  o:['X<sub>C</sub> = 1 / (2πνC)','X<sub>C</sub> = 2πνC','X<sub>C</sub> = 2πν / C','X<sub>C</sub> = C / (2πν)'],a:0},
+ {t:'Мгновенное значение напряжения',type:'mcq',plot:true,q:'Напряжение в цепи изменяется по закону u = cos ωt (В). Выберите соответствующий график:',
+  o:[{svg:wave(wSin,'u, В')},{svg:wave(wCos,'u, В')},{svg:wave(wNCos,'u, В')},{svg:wave(wOne,'u, В')}],a:1},
+ {t:'Мгновенное значение силы тока',type:'mcq',plot:true,q:'Сила тока в цепи изменяется по закону i = sin ωt (А). Укажите график зависимости силы тока от времени:',
+  o:[{svg:wave(wNSin,'i, А')},{svg:wave(wOne,'i, А')},{svg:wave(wSin,'i, А')},{svg:wave(wCos,'i, А')}],a:2},
+ {t:'Условие резонанса',type:'mcq',plot:true,q:'На каком графике изображена зависимость амплитуды силы тока в последовательном RLC-контуре от частоты ν (ν₀ — резонансная частота)?',
+  o:[{svg:resPlot(flat)},{svg:resPlot(bell)},{svg:resPlot(t=>0.25+0.4*t)},{svg:resPlot(decay)}],a:1},
+ {t:'Индуктивное сопротивление',type:'calc',q:'Индуктивность катушки L = 0,1 Гн, частота сети ν = 200 Гц. Найдите индуктивное сопротивление катушки.',
+  f:['X<sub>L</sub> = L / (2πν)','X<sub>L</sub> = 2πνL','X<sub>L</sub> = 1 / (2πνL)','X<sub>L</sub> = 2πν²L'],fa:1,ans:125.6,tol:0.6,note:'Ответ введите числом в омах (Ом). π ≈ 3,14.'},
+ {t:'Частота вращения ротора генератора',type:'calc',q:'Ротор генератора делает N = 3000 оборотов в минуту. Найдите частоту вращения ротора.',
+  f:['ν = N / t','ν = t / N','ν = N · t','ν = N · t²'],fa:0,ans:50,tol:0.05,note:'Ответ введите числом в герцах (Гц); N — число оборотов за время t.'},
+ {t:'Максимальная сила тока при резонансе',type:'calc',q:'В последовательном контуре наступил резонанс. Амплитуда напряжения U<sub>m</sub> = 150 В, активное сопротивление R = 25 Ом. Найдите максимальную силу тока в режиме резонанса.',
+  f:['I<sub>m</sub> = U<sub>m</sub> · R','I<sub>m</sub> = R / U<sub>m</sub>','I<sub>m</sub> = U<sub>m</sub> / R','I<sub>m</sub> = √2 · U<sub>m</sub> · R'],fa:2,ans:6,tol:0.05,note:'Ответ введите числом в амперах (А).'},
+ {t:'Коэффициент трансформации',type:'calc',q:'Первичная обмотка трансформатора содержит N₁ = 1200 витков, вторичная — N₂ = 300 витков. Найдите коэффициент трансформации.',
+  f:['k = N₂ / N₁','k = N₁ / N₂','k = N₁ · N₂','k = N₁ − N₂'],fa:1,ans:4,tol:0.05,note:'Ответ — безразмерное число.'}
+]};
+
+/* ================== СОСТОЯНИЕ ================== */
+const P = {fio:'',klass:'',variant:''};
+let S = null;
+
+/* ================== НАВИГАЦИЯ ================== */
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $('#'+id).classList.add('active'); window.scrollTo(0,0); }
+
+/* --- экран 1 --- */
+const fio=$('#fio'), klass=$('#klass'), variant=$('#variant'), btnNext1=$('#btnNext1');
+function validForm(){
+  return fio.value.trim().split(/\s+/).length>=2 && klass.value && variant.value;
+}
+function refreshStart(){
+  btnNext1.disabled=!validForm();
+  btnNext1.classList.toggle('lit', validForm());
+  if(klass.value&&variant.value){
+    P.fio=fio.value.trim(); P.klass=klass.value; P.variant=variant.value;
+    $('#attChip').textContent=`Попыток использовано: ${getAttempts(P)}`;
+  } else $('#attChip').textContent='Попыток использовано: —';
+}
+[fio].forEach(el=>el.addEventListener('input',refreshStart));
+[klass,variant].forEach(el=>el.addEventListener('change',refreshStart));
+btnNext1.addEventListener('click',()=>{ if(!validForm())return;
+  P.fio=fio.value.trim().replace(/\s+/g,' '); P.klass=klass.value; P.variant=variant.value;
+  show('scr-disc');
+});
+
+/* --- экран 2: старт --- */
+$('#btnStart').addEventListener('click',()=>{
+  const db=store.get(); const k=attKey(P); db[k]=(db[k]||0)+1; store.set(db);   // попытка +1
+  S={idx:0,score:0,warns:0,cur:null,curAns:null,running:true,questions:BANK[P.variant]};
+  AC.warn=0; AC.lastV=0; AC.baseH=window.innerHeight; AC.baseW=window.innerWidth;
+  $('#chipFio').textContent=P.fio;
+  $('#chipVar').textContent=P.variant==='v1'?'Вариант 1':'Вариант 2';
+  show('scr-quiz'); renderQ();
+});
+
+/* ================== ВОПРОСЫ ================== */
+const dots=$('#dots');
+function buildDots(){ dots.innerHTML=S.questions.map(()=>'<i></i>').join(''); }
+function updDots(){ [...dots.children].forEach((d,i)=>{ d.className=(i<S.idx?'done':i===S.idx?'cur':''); }); }
+
+function renderQ(){
+  const q=S.questions[S.idx];
+  S.cur = q.type==='mcq' ? {sel:null} : {f:-1,v:''};
+  $('#chipQ').textContent=`${S.idx+1} / ${S.questions.length}`;
+  updDots();
+  $('#qTopic').textContent=`ТЕМА: ${q.t}`;
+  $('#qText').innerHTML=q.q;
+  const opts=$('#optsBox'), calc=$('#calcBox');
+  if(q.type==='mcq'){
+    calc.style.display='none'; opts.style.display='grid';
+    opts.className='opts'+(q.plot?' grid2':'');
+    opts.innerHTML=q.o.map((o,i)=>typeof o==='object'
+      ? `<button class="opt plot" data-i="${i}"><span class="lt">${letters[i]}</span><span class="pv">${o.svg}</span></button>`
+      : `<button class="opt" data-i="${i}"><span class="lt">${letters[i]}</span><span>${o}</span></button>`).join('');
+    opts.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>{
+      opts.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel'); S.cur.sel=+b.dataset.i; gate();
+    }));
+  } else {
+    opts.style.display='none'; opts.innerHTML=''; calc.style.display='block';
+    const fs=$('#fSel');
+    fs.innerHTML='<option value="">— выберите формулу —</option>'+q.f.map((f,i)=>`<option value="${i}">${f.replace(/<sub>/g,'').replace(/<\/sub>/g,'')}</option>`).join('');
+    $('#aIn').value=''; $('#unitNote').textContent='ℹ '+q.note;
+    fs.onchange=()=>{ S.cur.f=fs.value===''?-1:+fs.value; gate(); };
+    $('#aIn').oninput=e=>{ e.target.value=e.target.value.replace(/[^0-9.,\-]/g,''); S.cur.v=e.target.value; gate(); };
+  }
+  gate(); startTimer();
+}
+function gate(){
+  const q=S.questions[S.idx];
+  const ok = q.type==='mcq' ? S.cur.sel!==null
+           : (S.cur.f>=0 && numOk(S.cur.v));
+  $('#btnNext').disabled=!ok;
+  $('#btnNext').classList.toggle('lit',ok);
+}
+const numOk=v=>isFinite(parseFloat(String(v).replace(',','.')));
+
+$('#btnNext').addEventListener('click',()=>{ if($('#btnNext').disabled)return; commit(); advance(); });
+$('#aIn')?.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!$('#btnNext').disabled){ commit(); advance(); }});
+
+function commit(){
+  const q=S.questions[S.idx]; let ok=false;
+  if(q.type==='mcq') ok = S.cur.sel===q.a;
+  else ok = S.cur.f===q.fa && Math.abs(parseFloat(String(S.cur.v).replace(',','.'))-q.ans)<=q.tol;
+  if(ok) S.score++;
+}
+function advance(){ stopTimer(); S.idx++; if(S.idx>=S.questions.length) finish('Тест завершён'); else renderQ(); }
+
+/* ================== ТАЙМЕР ================== */
+const CIRC=163.4; let tId=null, deadline=0;
+function startTimer(){
+  stopTimer(); deadline=Date.now()+TIME_Q*1000; tick();
+  tId=setInterval(tick,250);
+}
+function tick(){
+  const rem=Math.max(0,deadline-Date.now()), s=Math.ceil(rem/1000);
+  $('#tSec').textContent=fmtT(s);
+  $('#ringFg').style.strokeDashoffset=CIRC*(1-rem/(TIME_Q*1000));
+  const ring=$('#ring'); ring.classList.toggle('warn',s<=30&&s>10); ring.classList.toggle('danger',s<=10);
+  if(rem<=0){ stopTimer(); advance(); }        // время вышло → авто-переход
+}
+function stopTimer(){ if(tId){clearInterval(tId);tId=null;} }
+
+/* ================== АНТИЧИТ ==================
+   1-е нарушение → предупреждение, 2-е → завершение теста.
+   Ложные срабатывания (клавиатура на iPhone, системные жесты) отфильтрованы. */
+const AC={warn:0,lastV:0,baseH:innerHeight,baseW:innerWidth,t:null,rsT:null};
+const typing=()=>{const a=document.activeElement;return a&&['INPUT','TEXTAREA','SELECT'].includes(a.tagName);};
+function violation(reason){
+  if(!S||!S.running)return;
+  const now=Date.now(); if(now-AC.lastV<2500)return;   // защита от «двойного» срабатывания
+  if(AC.warn>=1){ terminateAC(reason); return; }
+  AC.lastV=now; AC.warn=1; S.warns=1;
+  $('#acTxt').textContent=`${reason}. Это первое предупреждение. При повторном нарушении тест будет завершён автоматически, попытка будет засчитана.`;
+  $('#acOv').classList.add('show');
+}
+$('#acBtn').addEventListener('click',()=>{ $('#acOv').classList.remove('show'); AC.lastV=Date.now(); });
+function terminateAC(reason){
+  $('#acOv').classList.remove('show');
+  finish('Остановлен античитом: '+reason);
+}
+/* сворачивание вкладки/браузера */
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) violation('Сворачивание вкладки/браузера'); });
+/* потеря фокуса окна — с повторной проверкой (исключает ложные срабатывания на iOS:
+   клавиатура, системные панели, короткая потеря фокуса) */
+window.addEventListener('blur',()=>{
+  if(!S||!S.running||typing())return;
+  setTimeout(()=>{ if(S&&S.running&&!document.hasFocus()&&!document.hidden&&!typing()) violation('Переключение на другое окно'); },350);
+});
+/* выдвижение второго окна снизу (Samsung и др.): высота заметно уменьшилась, клавиатура НЕ открыта */
+window.addEventListener('resize',()=>{
+  if(!S||!S.running)return;
+  clearTimeout(AC.rsT);
+  AC.rsT=setTimeout(()=>{
+    const h=innerHeight,w=innerWidth;
+    if(w!==AC.baseW){AC.baseW=w;AC.baseH=h;return;}       // поворот экрана
+    if(typing())return;                                    // открылась клавиатура — НЕ нарушение
+    if(h<AC.baseH*0.7) violation('Открыто второе окно поверх теста');
+  },450);
+});
+window.addEventListener('orientationchange',()=>setTimeout(()=>{AC.baseH=innerHeight;AC.baseW=innerWidth;},700));
+
+/* ================== ФИНАЛ ================== */
+function finish(status){
+  if(!S||!S.running)return;
+  S.running=false; stopTimer();
+  const db=store.get(); const att=db[attKey(P)]||1;
+  $('#resScore').textContent=S.score;
+  const v=[
+    [9,'ОТЛИЧНО'],[7,'ХОРОШО'],[4,'УДОВЛЕТВОРИТЕЛЬНО'],[-1,'ТЕМУ НУЖНО ПОВТОРИТЬ']
+  ].find(x=>S.score>=x[0])[1];
+  $('#resVerdict').textContent=v;
+  $('#rFio').textContent=P.fio; $('#rKlass').textContent=P.klass;
+  $('#rVar').textContent=P.variant==='v1'?'Вариант 1':'Вариант 2';
+  $('#rStat').textContent=status; $('#rAtt').textContent=att;
+  show('scr-res');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ $('#resBar').style.width=(S.score*10)+'%'; }));
+  $('#sheetStat').textContent='Отправка результата учителю…';
+  sendToSheets(att,status);
+}
+$('#btnSend').addEventListener('click',()=>{ const db=store.get(); sendToSheets(db[attKey(P)]||1,'Повторная отправка'); });
+$('#btnAgain').addEventListener('click',()=>{
+  fio.value=P.fio; klass.value=P.klass; variant.value=P.variant; refreshStart(); show('scr-start');
+});
+
+/* ================== GOOGLE SHEETS ================== */
+async function sendToSheets(attempts,status){
+  const p={fio:P.fio,klass:P.klass,variant:P.variant==='v1'?'Вариант 1':'Вариант 2',
+           score:S.score,attempts:attempts,status,warn:S.warns,ts:new Date().toLocaleString('ru-RU')};
+  if(!SHEETS_URL.startsWith('https')){
+    $('#sheetStat').textContent='⚠ Сервер не настроен: вставьте URL Apps Script в константу SHEETS_URL в файле.'; return;
+  }
+  try{
+    await fetch(SHEETS_URL,{method:'POST',mode:'no-cors',
+      headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+      body:new URLSearchParams(p).toString()});
+    $('#sheetStat').textContent='✔ Результат отправлен учителю в Google Sheets.';
+  }catch(e){
+    $('#sheetStat').textContent='✖ Ошибка сети. Нажмите «Отправить в Google Sheets» ещё раз.';
+  }
+}
+refreshStart();
+</script>
+</body>
+</html>
